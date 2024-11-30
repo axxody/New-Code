@@ -1,0 +1,341 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Laboratory Requests</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+        h1 {
+            text-align: center;
+            color: #0078d4;
+        }
+        .container {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+        }
+        .column {
+            flex: 1;
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .form-group input,
+        .form-group select,
+        .form-group button {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            margin-top: 5px;
+        }
+        .row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .row input,
+        .row select {
+            flex: 1;
+        }
+        button {
+            background-color: #0078d4;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #005bb5;
+        }
+        .test-list {
+            margin-top: 20px;
+        }
+        .test-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px;
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            margin-bottom: 5px;
+            border-radius: 4px;
+        }
+        .search-container {
+            position: relative;
+        }
+        .dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            width: 100%;
+            background: white;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            max-height: 150px;
+            overflow-y: auto;
+            display: none;
+            z-index: 1;
+        }
+        .dropdown-item {
+            padding: 8px;
+            cursor: pointer;
+        }
+        .dropdown-item:hover {
+            background-color: #eee;
+        }
+        .total {
+            font-weight: bold;
+            margin-top: 10px;
+        }
+        .print-area {
+            display: none;
+        }
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            .print-area, .print-area * {
+                visibility: visible;
+            }
+            .print-area {
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                padding: 20px;
+                box-sizing: border-box;
+            }
+        }
+    </style>
+    <script>
+        function setCurrentDateTime() {
+            const now = new Date();
+            const date = now.toISOString().split('T')[0];
+            const time = now.toTimeString().split(' ')[0];
+            document.getElementById('request-date').value = date;
+            document.getElementById('request-time').value = time;
+        }
+
+        function calculateAge() {
+            const dob = new Date(document.getElementById('dob').value);
+            const today = new Date();
+            let age = today.getFullYear() - dob.getFullYear();
+            const m = today.getMonth() - dob.getMonth();
+            if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) {
+                age--;
+            }
+            document.getElementById('age').value = age;
+        }
+
+        const availableTests = {
+            "100 GMS OGTT": 895,
+            "75 GMS OGTT": 895,
+            "ABO/RH TYPING": 150,
+            "ALBUMIN": 150,
+            "ALKALINE PHOSPHATASE": 260,
+            "ALT/SGPT": 180,
+            "AMYLASE": 260,
+            "ANTI-HBS (QUANTITATIVE)": 1200,
+            "ANTI-HCV (QUALITATIVE)": 250,
+            "AST/SGOT": 180,
+            "APTT": 480,
+            "BILIRUBIN (TB, B1, B2)": 550,
+            "BLOOD UREA NITROGEN": 120,
+            "CA 12-5": 1620,
+            "CA 19-9": 1300,
+            "CEA": 1110,
+            "CHLORIDE": 210,
+            "COMPLETE BLOOD COUNT": 150,
+            "CORTISOL": 140,
+            "COVID-19 RAT": 550,
+            "CREATININE": 140,
+            "CT/BT": 100,
+            "DENGUE DUO": 650,
+            "ESR": 200,
+            "FASTING BLOOD SUGAR": 140,
+            "FECALYSIS": 50,
+            "FOBT": 120,
+            "FT3": 680,
+            "FT4": 600,
+            "H. PYLORI STOOL AG TEST": 250,
+            "HBA1C": 600,
+            "HBSAG (QUALITATIVE)": 200,
+            "IONIZED CALCIUM": 230,
+            "KOH": 220,
+            "LDH": 270,
+            "LIPASE": 270,
+            "LIPID PROFILE": 480,
+            "MAGNESIUM": 260,
+            "MALARIAL SMEAR": 200,
+            "PAP SMEAR": 300,
+            "PERIPHERAL BLOOD SMEAR": 200,
+            "PHOSPHORUS": 260,
+            "POTASSIUM": 210,
+            "PROCALCITONIN": 1330,
+            "PROSTATE SPECIFIC ANTIGEN": 790,
+            "PROTIME WITH INR": 480,
+            "RANDOM BLOOD SUGAR": 90,
+            "RETICULOCYTE COUNT": 200,
+            "SERUM URIC ACID": 140,
+            "SERUM PREGNANCY TEST": 250,
+            "SODIUM": 210,
+            "SYPHILIS/VDRL TEST": 200,
+            "T3": 610,
+            "T4": 610,
+            "TOTAL CALCIUM": 230,
+            "TROPONIN I (QUALITATIVE)": 700,
+            "TROPONIN I (QUANTITATIVE)": 800,
+            "TSH": 610,
+            "TYPHIDOT (QUALITATIVE)": 200,
+            "URINALYSIS": 120,
+            "URINE PREGNANCY TEST": 150
+        };
+
+        let total = 0;
+
+        function filterTests() {
+            const searchInput = document.getElementById("test-search").value.toUpperCase();
+            const dropdown = document.getElementById("test-dropdown");
+            dropdown.innerHTML = "";
+
+            if (searchInput) {
+                const filteredTests = Object.keys(availableTests).filter(test =>
+                    test.toUpperCase().includes(searchInput)
+                );
+                dropdown.style.display = filteredTests.length ? "block" : "none";
+                filteredTests.forEach(test => {
+                    const option = document.createElement("div");
+                    option.classList.add("dropdown-item");
+                    option.textContent = test.toUpperCase();
+                    option.onclick = () => selectTest(test);
+                    dropdown.appendChild(option);
+                });
+            } else {
+                dropdown.style.display = "none";
+            }
+        }
+
+        function selectTest(test) {
+            const searchInput = document.getElementById("test-search");
+            searchInput.value = test.toUpperCase();
+            document.getElementById("test-dropdown").style.display = "none";
+        }
+
+        function addTest() {
+            const testInput = document.getElementById("test-search").value.toUpperCase();
+            if (testInput && availableTests[testInput]) {
+                const testList = document.getElementById("test-list");
+                const testItem = document.createElement("div");
+                testItem.classList.add("test-item");
+                testItem.textContent = `${testInput} - ₱${availableTests[testInput]}`;
+                testList.appendChild(testItem);
+
+                total += availableTests[testInput];
+                updateTotal();
+                document.getElementById("test-search").value = ""; // Clear input
+            }
+        }
+
+        function updateTotal() {
+            document.getElementById("total").textContent = `₱${total.toFixed(2)}`;
+        }
+
+        window.onload = setCurrentDateTime;
+    </script>
+</head>
+<body>
+    <h1>Laboratory Requests</h1>
+    <div class="container">
+        <!-- Left Column -->
+        <div class="column">
+            <div class="form-group">
+                <label for="request-date">Date of Request:</label>
+                <input type="date" id="request-date" readonly>
+            </div>
+            <div class="form-group">
+                <label for="request-time">Time of Request:</label>
+                <input type="time" id="request-time" readonly>
+            </div>
+            <div class="form-group">
+                <label>Name:</label>
+                <div class="row">
+                    <input type="text" id="surname" placeholder="Surname">
+                    <input type="text" id="given-name" placeholder="Given Name">
+                    <input type="text" id="middle-name" placeholder="Middle Name">
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="dob">Birthdate:</label>
+                <div class="row">
+                    <input type="date" id="dob" onchange="calculateAge()">
+                    <input type="text" id="age" placeholder="Age" readonly>
+                    <select id="sex">
+                        <option value="" disabled selected>Sex</option>
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="ward">Ward:</label>
+                <select id="ward">
+                    <option value="" disabled selected>Select Ward</option>
+                    <option value="Emergency Department">Emergency Department</option>
+                    <option value="Out Patient Department">Out Patient Department</option>
+                    <option value="Pediatric Medical Ward">Pediatric Medical Ward</option>
+                    <option value="Adult Medical Ward">Adult Medical Ward</option>
+                    <option value="Pediatric Isolation Ward">Pediatric Isolation Ward</option>
+                    <option value="Adult Isolation Ward">Adult Isolation Ward</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="physician">Requesting Physician:</label>
+                <select id="physician">
+                    <option value="" disabled selected>Select Physician</option>
+                    <option value="Alcaide, MD">Alcaide, MD</option>
+                    <option value="Apostol, MD">Apostol, MD</option>
+                    <option value="Aturdido P, MD">Aturdido P, MD</option>
+                    <option value="Aturdido R, MD">Aturdido R, MD</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Right Column -->
+        <div class="column">
+            <div class="form-group">
+                <label for="test-search">Search Test:</label>
+                <div class="search-container">
+                    <input type="text" id="test-search" placeholder="Type test name..." oninput="filterTests()">
+                    <div id="test-dropdown" class="dropdown"></div>
+                </div>
+            </div>
+            <div class="form-group">
+                <button type="button" onclick="addTest()">Add Request</button>
+            </div>
+            <div class="test-list" id="test-list">
+                <!-- Added tests will appear here -->
+            </div>
+            <div class="total" id="total">₱0.00</div>
+        </div>
+    </div>
+</body>
+</html>

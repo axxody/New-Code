@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Write Prescription</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 14px;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+        }
+        .container {
+            display: flex;
+            width: 100%;
+            max-width: 1200px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        .left-column {
+            padding: 20px;
+            box-sizing: border-box;
+            flex: 0.45;
+            border-right: 1px solid #ddd;
+        }
+        .right-column {
+            padding: 20px;
+            box-sizing: border-box;
+            flex: 0.55;
+            display: flex;
+            flex-direction: column;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .form-inline {
+            display: flex;
+            gap: 10px;
+        }
+        .form-inline input, .form-inline select {
+            flex: 1;
+        }
+        .form-group input, .form-group textarea, .form-group select {
+            width: 100%;
+            padding: 6px;
+            font-size: 14px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .form-group textarea {
+            resize: none;
+            height: 60px;
+        }
+        .button {
+            display: block;
+            width: 100%;
+            background-color: #4caf50;
+            color: white;
+            padding: 8px;
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+            cursor: pointer;
+            text-align: center;
+        }
+        .button:hover {
+            background-color: #45a049;
+        }
+        .prescription-pad {
+            background: #f9f9f9;
+            padding: 8px;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+            margin-top: 15px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .prescription-pad ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .prescription-pad li {
+            padding: 8px;
+            margin-bottom: 10px;
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            position: relative;
+        }
+        .remove-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #ff5c5c;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+        .remove-button:hover {
+            background: #e04343;
+        }
+        @media print {
+            body {
+                background: white;
+                margin: 0;
+                padding: 0;
+            }
+            .container {
+                display: none;
+            }
+                .printable-area {
+        display: block;
+        font-size: 12px;
+        width: 148mm; /* A6 size in landscape mode */
+        height: 105mm;
+        padding: 1cm; /* Set padding to 1 cm */
+        box-sizing: border-box;
+    }
+            .printable-header img {
+                width: 100%;
+                max-height: 100px;
+                object-fit: contain;
+            }
+            .printable-content p {
+                margin: 0; /* Remove spacing between elements */
+            }
+            .printable-content ul li {
+                margin-bottom: 10px; /* Adds spacing between medications */
+            }
+            .printable-footer p {
+                margin: 5px 0; /* Adjust general footer spacing */
+            }
+            .printable-footer p:first-child {
+                margin-bottom: 0; /* Remove space between doctor and license number */
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Left Column -->
+        <div class="left-column">
+            <h2>Patient Information</h2>
+            <div class="form-group">
+                <label for="currentDate">Date:</label>
+                <input type="text" id="currentDate" readonly>
+            </div>
+            <div class="form-group">
+                <label for="name">Name:</label>
+                <input type="text" id="name" placeholder="Enter patient name">
+            </div>
+            <div class="form-group">
+                <label for="address">Address:</label>
+                <input type="text" id="address" placeholder="Enter patient address">
+            </div>
+            <div class="form-group">
+                <label>Date of Birth and Age:</label>
+                <div class="form-inline">
+                    <input type="date" id="dob" onchange="computeAge()">
+                    <input type="text" id="age" readonly placeholder="Age">
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="sex">Sex:</label>
+                <select id="sex">
+                    <option value="">Select</option>
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                </select>
+            </div>
+            <div class="form-group">
+    <label for="doctor">Doctor:</label>
+    <select id="doctor" onchange="updateLicenseNumber()">
+        <option value="">Select Doctor</option>
+        <option value="0122773">Defino - Ablanida, MD</option>
+        <option value="0169927">Belloga, MD</option>
+        <option value="0167827">Aturdido, P MD</option>
+        <option value="0144211">Aturdido, R MD</option>
+        <option value="0124938">Cruz - Odin, MD</option>
+        <option value="0130284">Dajay, MD</option>
+        <option value="0170243">Dequiña, MD</option>
+        <option value="0155922">Dionaldo, MD</option>
+        <option value="0138375">Estacion, MD</option>
+        <option value="0161847">Fresnido, MD</option>
+        <option value="0154358">Gallaza, MD</option>
+        <option value="0168827">Garingo, MD</option>
+        <option value="074796">Garcia, MD</option>
+        <option value="0114742">Gulac, MD</option>
+        <option value="0137361">Laruya, MD</option>
+        <option value="0119258">Nisnisan, MD</option>
+        <option value="0111958">Palomata, MD</option>
+        <option value="0137276">Pama, MD</option>
+        <option value="0126687">Santos, MD</option>
+        <option value="0152040">Tedera, MD</option>
+    </select>
+    <div>
+        <strong>License Number:</strong> <span id="license">N/A</span>
+    </div>
+</div>
+
+        </div>
+
+        <!-- Right Column -->
+        <div class="right-column">
+            <h2>Medication Details</h2>
+            <div class="form-group">
+                <label for="medication">Medication:</label>
+                <input type="text" id="medication" placeholder="Enter medication name">
+            </div>
+            <div class="form-group">
+                <label>Dose, Form, and Quantity:</label>
+                <div class="form-inline">
+    <input type="text" id="dose" placeholder="Enter dose (e.g., 500mg)">
+    <select id="form">
+        <option value="">Select Form</option>
+        <option value="Capsule">Capsule</option>
+        <option value="Cream">Cream</option>
+        <option value="Drops">Drops</option>
+        <option value="Dry Powder Inhaler">Dry Powder Inhaler (DPI)</option>
+        <option value="Granule">Granule</option>
+        <option value="Inhaler">Inhaler</option>
+        <option value="Metered Dose Inhaler">Metered Dose Inhaler (MDI)</option>
+        <option value="Nebule">Nebule</option>
+        <option value="Ointment">Ointment</option>
+        <option value="Patch">Patch</option>
+        <option value="Powder">Powder</option>
+        <option value="Suspension">Suspension</option>
+        <option value="Suppository">Suppository</option>
+        <option value="Syrup">Syrup</option>
+        <option value="Tablet">Tablet</option>
+    </select>
+    <input type="number" id="numberNeeded" placeholder="Qty">
+</div>
+
+            </div>
+            <div class="form-group">
+                <label for="instruction">Instruction:</label>
+                <textarea id="instruction" placeholder="Enter instructions"></textarea>
+            </div>
+            <button class="button" onclick="addToPrescriptionPad()">Add to Prescription</button>
+            <button class="button" style="margin-top: 10px;" onclick="printPrescription()">Print Prescription</button>
+
+            <h2>Prescription Pad</h2>
+            <div class="prescription-pad" id="prescriptionPad">
+                <ul></ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Printable Area -->
+    <div class="printable-area" style="display: none;">
+        <div class="printable-header">
+            <img src="Header.png" alt="SOCCSKSARGEN General Hospital Header">
+        </div>
+        <hr style="border: 1px solid black; margin: 10px 0;">
+        <div class="printable-content">
+            <p><strong>Date:</strong> <span id="printDate"></span></p>
+            <p>
+                <strong>Name:</strong> <span id="printName"></span> &nbsp &nbsp;
+                <strong>Age:</strong> <span id="printAge"></span> &nbsp &nbsp;
+                <strong>Sex:</strong> <span id="printSex"></span>
+            </p>
+            <p><strong>Address:</strong> <span id="printAddress"></span></p>
+	    <hr style="border: 1px solid black; margin: 10px 0;">
+            <h3>Medications:</h3>
+            <ul id="printMedications"></ul>
+        </div>
+
+<!-- Printable Footer Section -->
+<div class="printable-footer">
+<hr style="border: 1px solid black; margin: 10px 0;">
+    <p style="margin-top: 30px;"><strong>Doctor:</strong> <span id="printDoctor"></span></p> <!-- Double spacing above -->
+    <p style="margin: 0;"><strong>License Number:</strong> <span id="printLicense"></span></p>
+    <p>_____________________ <strong>PTR Number</strong></p>
+    <p>_____________________ <strong>S2 License</strong></p>
+<p style="margin-top: 30px;"></p>
+<p style="font-size:8px;">NS-CNU0FM-07 REV0.2023.01.02</p>
+
+</div>
+
+    </div>
+
+    <script>
+        document.getElementById('currentDate').value = new Date().toLocaleDateString();
+
+        function computeAge() {
+            const dob = document.getElementById("dob").value;
+            if (!dob) return;
+            const birthDate = new Date(dob);
+            const today = new Date();
+            let age = today.getFullYear() - birthDate.getFullYear();
+            const monthDiff = today.getMonth() - birthDate.getMonth();
+            if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+                age--;
+            }
+            document.getElementById("age").value = age;
+        }
+
+        function updateLicenseNumber() {
+            const doctor = document.getElementById("doctor");
+            const licenseNumber = doctor.value;
+            document.getElementById("license").textContent = licenseNumber || "N/A";
+        }
+
+        function addToPrescriptionPad() {
+            const medication = document.getElementById("medication").value.trim();
+            const dose = document.getElementById("dose").value.trim();
+            const form = document.getElementById("form").value.trim();
+            const numberNeeded = document.getElementById("numberNeeded").value.trim();
+            const instruction = document.getElementById("instruction").value.trim();
+
+            if (!medication || !dose || !form || !numberNeeded || !instruction) {
+                alert("Please fill out all medication details.");
+                return;
+            }
+
+            const prescriptionPad = document.getElementById("prescriptionPad").querySelector("ul");
+            const li = document.createElement("li");
+
+            li.innerHTML = `
+                <strong>${medication}</strong> (${dose} - ${form}) - Quantity: ${numberNeeded}<br>
+                <em>${instruction}</em>
+                <button class="remove-button" onclick="removeMedication(this)">Remove</button>
+            `;
+
+            prescriptionPad.appendChild(li);
+
+            document.getElementById("medication").value = "";
+            document.getElementById("dose").value = "";
+            document.getElementById("form").value = "";
+            document.getElementById("numberNeeded").value = "";
+            document.getElementById("instruction").value = "";
+        }
+
+        function removeMedication(button) {
+            button.parentElement.remove();
+        }
+
+        function printPrescription() {
+            document.getElementById("printDate").textContent = document.getElementById("currentDate").value;
+            document.getElementById("printName").textContent = document.getElementById("name").value;
+            document.getElementById("printAge").textContent = document.getElementById("age").value;
+            document.getElementById("printSex").textContent = document.getElementById("sex").value;
+            document.getElementById("printAddress").textContent = document.getElementById("address").value;
+
+            const doctorSelect = document.getElementById("doctor");
+            const selectedDoctor = doctorSelect.options[doctorSelect.selectedIndex].text;
+            const selectedLicense = doctorSelect.value;
+
+            document.getElementById("printDoctor").textContent = selectedDoctor;
+            document.getElementById("printLicense").textContent = selectedLicense;
+
+            const prescriptionPad = document.getElementById("prescriptionPad").querySelector("ul");
+            const printMedications = document.getElementById("printMedications");
+
+            printMedications.innerHTML = "";
+
+            prescriptionPad.querySelectorAll("li").forEach((li) => {
+                const clonedLi = li.cloneNode(true);
+                clonedLi.querySelector(".remove-button")?.remove();
+                printMedications.appendChild(clonedLi);
+            });
+
+            document.querySelector(".printable-area").style.display = "block";
+            window.print();
+            document.querySelector(".printable-area").style.display = "none";
+        }
+    </script>
+</body>
+</html>

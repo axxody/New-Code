@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SOCCSKSARGEN General Hospital</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #1f2933; /* Soft navy background */
+            color: #ffffff; /* White text for contrast */
+        }
+        header {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            background-color: #1f2933; /* Match the soft navy background */
+            padding: 10px 20px;
+            border-bottom: 2px solid #3a4755;
+        }
+        .logo {
+            height: 60px; /* Adjust the height as needed */
+        }
+        .title {
+            margin-left: 15px;
+            font-size: 24px;
+            font-weight: bold;
+            color: #ffffff; /* White text */
+        }
+        .floating-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px; /* Spacing between buttons */
+            justify-content: center;
+            margin-top: 50px;
+        }
+        .floating-button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #3a4755; /* Dark grayish-blue for buttons */
+            color: #ffffff; /* White text for contrast */
+            border: none;
+            border-radius: 8px; /* Rounded rectangle */
+            width: 220px;
+            height: 80px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            text-align: center;
+            line-height: 1.2;
+            transition: background-color 0.3s, box-shadow 0.3s;
+        }
+        .floating-button:hover {
+            background-color: #536270; /* Lighter navy shade for hover */
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.4);
+        }
+        .floating-button img {
+            width: 32px;
+            height: 32px;
+            margin-right: 10px; /* Spacing between the image and text */
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <img src="logo.png" alt="SOCCSKSARGEN General Hospital Logo" class="logo">
+        <div class="title">SOCCSKSARGEN General Hospital</div>
+    </header>
+    
+    <div class="floating-buttons">
+        <!-- Prescription Button -->
+	<button class="floating-button" onclick="window.location.href='prescription.html';">
+ 		<img src="prescription-icon.png" alt="Prescription Icon">
+    		Prescription
+	</button>
+
+        <!-- Referral Button -->
+        <button class="floating-button" onclick="openReferralMenu()">
+            <img src="referral-icon.png" alt="Referral Icon">
+            Referral
+        </button>
+
+        <!-- Laboratory Requests Button -->
+	<button class="floating-button" onclick="window.location.href='laboratory.html';">
+	    <img src="laboratory-icon.png" alt="Laboratory Icon">
+	    Laboratory
+	</button>
+
+<script>
+    function openLaboratoryMenu() {
+        // Opens a new window with the laboratory requests page
+        window.open('laboratory.html', '_blank', 'width=800,height=600');
+    }
+</script>
+
+        
+	<!-- Radiology Requests Button -->
+        <button class="floating-button" onclick="openRadiologyMenu()">
+            <img src="radiology-icon.png" alt="Radiology Icon">
+            Radiology
+        </button>
+    </div>
+
+    <script>
+        function openPrescriptionMenu() {
+            alert('Prescription menu button clicked!');
+        }
+
+        function openReferralMenu() {
+            alert('Referral menu button clicked!');
+        }
+
+        function openLaboratoryMenu() {
+            alert('Laboratory menu button clicked!');
+        }
+
+        function openRadiologyMenu() {
+            alert('Radiology menu button clicked!');
+        }
+    </script>
+</body>
+</html>
